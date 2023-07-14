@@ -48,8 +48,8 @@ def detect_region_by_mouse(image, win_width = 1280, win_height = 720, plt_vis = 
             break
 
     click_coordinates = np.array(click_coordinates)*1.
-    click_coordinates[:,0] *= (height / scaled_height)
-    click_coordinates[:,1] *= (width / scaled_width)
+    click_coordinates[:,0] *= (height * 1. / scaled_height)
+    click_coordinates[:,1] *= (width * 1. / scaled_width)
 
     center = click_coordinates.mean(axis=0)
 
@@ -67,15 +67,14 @@ def detect_region_by_mouse(image, win_width = 1280, win_height = 720, plt_vis = 
     cv2.destroyAllWindows()
     # определение центра квадрата
     click_coordinates = np.array(click_coordinates)
-    click_coordinates
-    rad = int(max(((click_coordinates - center)**2).sum(axis=1)**0.5))
-    center = center.astype(int)
+    rad = max(((click_coordinates - center)**2).sum(axis=1)**0.5)
+    # center = center.astype(int)
     
     if plt_vis:
         image_copy = image.copy()
         # print(image_copy.shape)
         # cv2.namedWindow('Image')
-        cv2.circle(image_copy, center, rad, (0, 255, 255), -1)
+        cv2.circle(image_copy, int(center), int(rad), (0, 255, 255), -1)
         plt.imshow(image_copy)
         plt.title('Выбранная окрестность')
         plt.show()

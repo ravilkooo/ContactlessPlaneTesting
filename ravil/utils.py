@@ -5,8 +5,8 @@ import cv2
 def golden_section_search(func, min_val, max_val, eps, *args):
     golden_ratio = (1 + 5 ** 0.5) / 2  # Золотое сечение
 
-    a = min_val
-    b = max_val
+    a = min_val * 1.
+    b = max_val * 1.
 
     while abs(b - a) > eps:
         x1 = b - (b - a) / golden_ratio
@@ -41,7 +41,7 @@ def calc_diff(a, b, mask = None, reduction='MEAN'):
             return ((a - b)**2).sum()
         
 def fill_out_circle(arr):
-    np_arr = 255 - np.array(arr)
+    np_arr = 255. - np.array(arr)
     radius = np_arr.shape[0] // 2
     cv2.ellipse(np_arr, (radius, radius), (radius, radius), 0, 0, 360, 0, -1)
     return arr + np_arr

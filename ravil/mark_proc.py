@@ -58,8 +58,12 @@ def detect_mark(image, center, rad, plt_vis = False):
 
     # Удаление большей части фона
     image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    mark_part = image_gray[center[1] - rad:center[1] + rad, center[0] - rad:center[0] + rad]
-    label_pos_x, label_pos_y = center[0] - rad, center[1] - rad
+    center_int = np.array(center).astype(int)
+    rad_int = int(rad)
+
+    mark_part = image_gray[center_int[1] - rad_int:center_int[1] + rad_int, center_int[0] - rad:center_int[0] + rad_int]
+    # try float?
+    label_pos_x, label_pos_y = center_int[0] - rad_int, center_int[1] - rad_int
 
     mark_part = fill_out_circle(mark_part)
     if plt_vis:
@@ -106,6 +110,7 @@ def detect_mark(image, center, rad, plt_vis = False):
 
     # Квадрат, описывающий метку
     x,y,w,h = cv2.boundingRect(best_cntr)
+    # try float?
     wh_mean = (w + h) // 2
     dx = (w - wh_mean) // 2
     dy = (h - wh_mean) // 2
@@ -115,23 +120,22 @@ def detect_mark(image, center, rad, plt_vis = False):
         plt.show()
 
     # Координаты угла метки
+    # try float?
     label_pos_x += x + dx
     label_pos_y += y + dy
     if plt_vis:
         image_copy = image.copy()
         cv2.rectangle(image_copy, (label_pos_x, label_pos_y), (label_pos_x + wh_mean, label_pos_y + wh_mean), (36,255,12), 2)
         plt.imshow(image_copy)
-    # cv2.imshow('Image', image_copy)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
+
     # Вырез метки с картинки
     detected_template = image_gray[label_pos_y:label_pos_y + wh_mean,label_pos_x:label_pos_x + wh_mean]
     ret, thresh = cv2.threshold(detected_template, 170, 255, 0)
 
     # Задаем интервал значений и точность
-    min_val = 0
-    mean_val = 90
-    max_val = 180
+    min_val = 0.
+    mean_val = 90.
+    max_val = 180.
     eps = 0.001
 
     # Вызываем быстрый поиск для функции func полученной от calc_diff
@@ -157,9 +161,6 @@ def detect_mark(image, center, rad, plt_vis = False):
         image_copy[label_pos_y:label_pos_y + wh_mean,label_pos_x:label_pos_x + wh_mean, 0] = 255
         image_copy[label_pos_y:label_pos_y + wh_mean,label_pos_x:label_pos_x + wh_mean, 1] = most_acc_template
         image_copy[label_pos_y:label_pos_y + wh_mean,label_pos_x:label_pos_x + wh_mean, 2] = 255
-        # cv2.imshow('Result',image_copy)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
         plt.imshow(image_copy)
         plt.title(f'Координаты метки: ({label_pos_y + wh_mean//2}, {label_pos_x + wh_mean//2})\nУгол поворота метки: {result}')
         plt.show()
