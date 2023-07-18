@@ -74,7 +74,7 @@ def detect_region_by_mouse(image, win_width = 1280, win_height = 720, plt_vis = 
         image_copy = image.copy()
         # print(image_copy.shape)
         # cv2.namedWindow('Image')
-        cv2.circle(image_copy, int(center), int(rad), (0, 255, 255), -1)
+        cv2.circle(image_copy, center.astype(int), rad.astype(int), (0, 255, 255), -1)
         plt.imshow(image_copy)
         plt.title('Выбранная окрестность')
         plt.show()
