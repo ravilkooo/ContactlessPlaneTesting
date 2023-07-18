@@ -3,10 +3,10 @@ import cv2
 
 # фунцкия поиска лок минимума функции
 def golden_section_search(func, min_val, max_val, eps, *args):
-    golden_ratio = (1 + 5 ** 0.5) / 2  # Золотое сечение
+    golden_ratio = (1. + 5. ** 0.5) / 2  # Золотое сечение
 
-    a = min_val
-    b = max_val
+    a = min_val * 1.
+    b = max_val * 1.
 
     while abs(b - a) > eps:
         x1 = b - (b - a) / golden_ratio
@@ -19,8 +19,24 @@ def golden_section_search(func, min_val, max_val, eps, *args):
             b = x2
         else:
             a = x1
+        # print(a)
 
-    return (a + b) / 2
+    return (a + b) / 2.
+
+
+def ternary_search(func, min_val, max_val, eps, *args):
+    a, b = min_val*1., max_val*1.
+    while abs(b - a) > eps:
+        mid1 = a + (b - a) / 3
+        mid2 = b - (b - a) / 3
+
+        if func(mid1, *args) < func(mid2, *args):
+            b = mid2
+        else:
+            a = mid1
+
+    return (b + a) / 2
+
 
 def low_clip_value(x, low = -np.inf):
     return max(x, low)
