@@ -2,7 +2,7 @@ import numpy as np
 import re
 
 # Function to read the table of numbers
-def read_connectivity_table(filename):
+def read_connectivity_table(filename, auth='s'):
     with open(filename, 'r') as file:
         lines = file.readlines()
         start_index = None
@@ -19,14 +19,32 @@ def read_connectivity_table(filename):
         # Read the table of numbers between "connectivity" and "coordinates"
         if start_index is not None and end_index is not None:
             # table = [list(map(int, line.split())) for line in lines[start_index+1:end_index + 1]]
-            table = [np.array(list(map(int, line.split())))[np.arange(len(line.split())) != 1].tolist() for line in lines[start_index+1:end_index + 1]]
+            def int_mns_1(x):
+                return int(x) - 1
+            table = None
+
+            if auth == 'r':
+                table = [np.array(list(map(int_mns_1, line.split())))[np.arange(len(line.split())) != 1].tolist() for line in lines[start_index+1:end_index + 1]]
+                table = np.array(table)
+                return table
+            else: # auth == 's'
+                def line_record(line):
+                    return np.array(list(map(int_mns_1, line.split())))[np.arange(len(line.split())) != 1].tolist()
+
+                num = len(lines[start_index+1:end_index + 1])
+                table = np.zeros((num, 3), dtype=int)
+                for line in lines[start_index+1:end_index + 1]:
+                    rec_line = line_record(line)
+                    table[rec_line[0]] = rec_line[1:]
+
             return table
+
         else:
             print("Table not found in the file.")
             return []
 
 # Function to read the table of numbers
-def read_coordinates_table(filename):
+def read_coordinates_table(filename, auth='s'):
     with open(filename, 'r') as file:
         data = file.read()
 
@@ -55,12 +73,26 @@ def read_coordinates_table(filename):
         def row_to_scirow(l):
             return list(map(convert_to_scientific_notation, split_row(l)))
 
-        def scirow_to_vals(l):
-            _l = row_to_scirow(l)
-            return list([int(_l[0]), *list(map(float, _l[1:]))])
+        def float_mm2px(x):
+            return float(x) * 10.6
 
-        table = [scirow_to_vals(line) for line in lines[1:]]
+        def scirow_to_vals(l):
+            # Old version without reflecting x-axis (1920)
+            # _l = row_to_scirow(l)
+            # return list([int(_l[0])-1, *list(map(float_mm2px, _l[1:]))])
+            _l = row_to_scirow(l)
+            coord_row = list(map(float_mm2px, _l[1:]))
+            coord_row[0] = 1920 - coord_row[0]
+            return list([int(_l[0])-1, *coord_row])
+
 
         _, num, _, _ = map(int, lines[0].split())
+        if auth == 'r':
+            table = [scirow_to_vals(line) for line in lines[1:]]
+        else: # auth == 's'
+            table = np.zeros((num, 3))
+            for line in lines[1:]:
+                all_vals = scirow_to_vals(line)
+                table[all_vals[0]] = all_vals[1:]
 
         return num, table
